@@ -115,6 +115,7 @@ class RNConnectionService extends ReactContextBaseJavaModule {
 
         TelecomManager tm = null;
 
+        /*
         try {
             tm = (TelecomManager) ctx.getSystemService(Context.TELECOM_SERVICE);
             tm.placeCall(address, extras);
@@ -131,6 +132,7 @@ class RNConnectionService extends ReactContextBaseJavaModule {
             ConnectionService.unregisterStartCallPromise(callUUID);
             promise.reject(tr);
         }
+         */
     }
 
     /**

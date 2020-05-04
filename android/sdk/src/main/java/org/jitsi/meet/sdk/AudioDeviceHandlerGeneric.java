@@ -217,10 +217,10 @@ class AudioDeviceHandlerGeneric implements
             return true;
         }
 
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        audioManager.setMode(AudioManager.MODE_NORMAL);
         audioManager.setMicrophoneMute(false);
 
-        if (audioManager.requestAudioFocus(this, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN)
+        if (audioManager.requestAudioFocus(this, AudioManager.USE_DEFAULT_STREAM_TYPE, AudioManager.AUDIOFOCUS_GAIN)
             == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
             JitsiMeetLogger.w(TAG + " Audio focus request failed");
             return false;
