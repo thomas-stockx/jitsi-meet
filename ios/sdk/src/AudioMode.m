@@ -89,24 +89,24 @@ RCT_EXPORT_MODULE();
 
         defaultConfig = [[RTCAudioSessionConfiguration alloc] init];
         defaultConfig.category = AVAudioSessionCategoryAmbient;
-        defaultConfig.categoryOptions = 0;
+        defaultConfig.categoryOptions = AVAudioSessionCategoryOptionMixWithOthers;
         defaultConfig.mode = AVAudioSessionModeDefault;
 
         audioCallConfig = [[RTCAudioSessionConfiguration alloc] init];
-        audioCallConfig.category = AVAudioSessionCategoryPlayAndRecord;
-        audioCallConfig.categoryOptions = AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionDefaultToSpeaker;
-        audioCallConfig.mode = AVAudioSessionModeVoiceChat;
+        audioCallConfig.category = AVAudioSessionCategoryAmbient;
+        audioCallConfig.categoryOptions = AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionDefaultToSpeaker | AVAudioSessionCategoryOptionMixWithOthers;
+        audioCallConfig.mode = AVAudioSessionModeDefault;
 
         videoCallConfig = [[RTCAudioSessionConfiguration alloc] init];
-        videoCallConfig.category = AVAudioSessionCategoryPlayAndRecord;
-        videoCallConfig.categoryOptions = AVAudioSessionCategoryOptionAllowBluetooth;
-        videoCallConfig.mode = AVAudioSessionModeVideoChat;
+        videoCallConfig.category = AVAudioSessionCategoryAmbient;
+        videoCallConfig.categoryOptions = AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionMixWithOthers;
+        videoCallConfig.mode = AVAudioSessionModeDefault;
 
         // Manually routing audio to the earpiece doesn't quite work unless one disables BT (weird, I know).
         earpieceConfig = [[RTCAudioSessionConfiguration alloc] init];
-        earpieceConfig.category = AVAudioSessionCategoryPlayAndRecord;
-        earpieceConfig.categoryOptions = 0;
-        earpieceConfig.mode = AVAudioSessionModeVoiceChat;
+        earpieceConfig.category = AVAudioSessionCategoryAmbient;
+        earpieceConfig.categoryOptions = AVAudioSessionCategoryOptionMixWithOthers;
+        earpieceConfig.mode = AVAudioSessionModeDefault;
 
         forceSpeaker = NO;
         forceEarpiece = NO;
@@ -145,6 +145,7 @@ RCT_EXPORT_METHOD(setMode:(int)mode
     NSError *error;
 
     if (config == nil) {
+        NSLog(@"setMode", @"Invalid mode", nil);
         reject(@"setMode", @"Invalid mode", nil);
         return;
     }
@@ -160,6 +161,7 @@ RCT_EXPORT_METHOD(setMode:(int)mode
     if ([self setConfig:config error:&error]) {
         resolve(nil);
     } else {
+        NSLog(@"setMode", error.localizedDescription, error);
         reject(@"setMode", error.localizedDescription, error);
     }
     
@@ -169,6 +171,7 @@ RCT_EXPORT_METHOD(setMode:(int)mode
 RCT_EXPORT_METHOD(setAudioDevice:(NSString *)device
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
+    NSLog(@"[AudioMode] Selected device: %@", device);
     DDLogInfo(@"[AudioMode] Selected device: %@", device);
     
     RTCAudioSession *session = [RTCAudioSession sharedInstance];
@@ -217,6 +220,7 @@ RCT_EXPORT_METHOD(setAudioDevice:(NSString *)device
             success = [session setPreferredInput:port error:&error];
         } else {
             success = NO;
+            NSLog(@"Could not find audio device");
             error = RCTErrorWithMessage(@"Could not find audio device");
         }
     }
@@ -226,6 +230,7 @@ RCT_EXPORT_METHOD(setAudioDevice:(NSString *)device
     if (success) {
         resolve(nil);
     } else {
+        NSLog(@"setAudioDevice", error != nil ? error.localizedDescription : @"", error);
         reject(@"setAudioDevice", error != nil ? error.localizedDescription : @"", error);
     }
 }
@@ -246,11 +251,13 @@ RCT_EXPORT_METHOD(updateDeviceList) {
         switch (reason) {
             case AVAudioSessionRouteChangeReasonNewDeviceAvailable:
             case AVAudioSessionRouteChangeReasonOldDeviceUnavailable:
+                NSLog(@"Device change, new or old");
                 // If the device list changed, reset our overrides.
                 self->forceSpeaker = NO;
                 self->forceEarpiece = NO;
                 break;
             case AVAudioSessionRouteChangeReasonCategoryChange:
+                NSLog(@"Category has changed");
                 // The category has changed. Check if it's the one we want and adjust as
                 // needed.
                 break;
@@ -258,10 +265,14 @@ RCT_EXPORT_METHOD(updateDeviceList) {
                 return;
         }
 
+        NSLog(@"in audioSession Did Change Route");
+
         // We don't want to touch the category when in default mode.
         // This is to play well with other components which could be integrated
         // into the final application.
+        
         if (self->activeMode != kAudioModeDefault) {
+            NSLog(@"[AudioMode] Route changed, reapplying RTCAudioSession config");
             DDLogInfo(@"[AudioMode] Route changed, reapplying RTCAudioSession config");
             RTCAudioSessionConfiguration *config = [self configForMode:self->activeMode];
             [self setConfig:config error:nil];
@@ -276,6 +287,7 @@ RCT_EXPORT_METHOD(updateDeviceList) {
 }
 
 - (void)audioSession:(RTCAudioSession *)audioSession didSetActive:(BOOL)active {
+    NSLog(@"[AudioMode] Audio session didSetActive:%d", active);
     DDLogInfo(@"[AudioMode] Audio session didSetActive:%d", active);
 }
 

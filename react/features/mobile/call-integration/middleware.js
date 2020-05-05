@@ -338,7 +338,7 @@ function _handleConnectionServiceFailure(state: Object) {
             const hasVideo = !isVideoMutedByAudioOnly(state);
 
             // Set the desired audio mode, since we just reset the whole thing.
-            AudioMode.setMode(hasVideo ? AudioMode.VIDEO_CALL : AudioMode.AUDIO_CALL);
+            AudioMode.setMode(hasVideo ? AudioMode.DEFAULT : AudioMode.DEFAULT);
         }
     }
 }
