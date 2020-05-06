@@ -93,20 +93,20 @@ RCT_EXPORT_MODULE();
         defaultConfig.mode = AVAudioSessionModeDefault;
 
         audioCallConfig = [[RTCAudioSessionConfiguration alloc] init];
-        audioCallConfig.category = AVAudioSessionCategoryAmbient;
+        audioCallConfig.category = AVAudioSessionCategoryPlayAndRecord;
         audioCallConfig.categoryOptions = AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionDefaultToSpeaker | AVAudioSessionCategoryOptionMixWithOthers;
-        audioCallConfig.mode = AVAudioSessionModeDefault;
+        audioCallConfig.mode = AVAudioSessionModeVoiceChat;
 
         videoCallConfig = [[RTCAudioSessionConfiguration alloc] init];
-        videoCallConfig.category = AVAudioSessionCategoryAmbient;
+        videoCallConfig.category = AVAudioSessionCategoryPlayAndRecord;
         videoCallConfig.categoryOptions = AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionMixWithOthers;
-        videoCallConfig.mode = AVAudioSessionModeDefault;
+        videoCallConfig.mode = AVAudioSessionModeVideoChat;
 
         // Manually routing audio to the earpiece doesn't quite work unless one disables BT (weird, I know).
         earpieceConfig = [[RTCAudioSessionConfiguration alloc] init];
-        earpieceConfig.category = AVAudioSessionCategoryAmbient;
+        earpieceConfig.category = AVAudioSessionCategoryPlayAndRecord;
         earpieceConfig.categoryOptions = AVAudioSessionCategoryOptionMixWithOthers;
-        earpieceConfig.mode = AVAudioSessionModeDefault;
+        earpieceConfig.mode = AVAudioSessionModeVoiceChat;
 
         forceSpeaker = NO;
         forceEarpiece = NO;
