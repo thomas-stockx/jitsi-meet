@@ -128,6 +128,8 @@ RCT_EXPORT_MODULE();
 - (BOOL)setConfig:(RTCAudioSessionConfiguration *)config
             error:(NSError * _Nullable *)outError {
 
+    NSLog(@"Going to set config on RTC Audio Session");
+
     RTCAudioSession *session = [RTCAudioSession sharedInstance];
     [session lockForConfiguration];
     BOOL success = [session setConfiguration:config error:outError];
@@ -154,6 +156,17 @@ RCT_EXPORT_METHOD(setMode:(int)mode
     if (mode == kAudioModeDefault) {
         forceSpeaker = NO;
         forceEarpiece = NO;
+    }
+
+    NSLog(@"Setting mode");
+    if (mode == kAudioModeDefault) {
+        NSLog(@"Setting to kAudioModeDefault");
+    }
+    if (mode == kAudioModeAudioCall) {
+        NSLog(@"Setting to kAudioModeAudioCall");
+    }
+    if (mode == kAudioModeVideoCall) {
+        NSLog(@"Setting to kAudioModeVideoCall");
     }
 
     activeMode = mode;
@@ -248,6 +261,7 @@ RCT_EXPORT_METHOD(updateDeviceList) {
     [self notifyDevicesChanged];
 
     dispatch_async(_workerQueue, ^{
+        AVAudioSession *session = [AVAudioSession sharedInstance];
         switch (reason) {
             case AVAudioSessionRouteChangeReasonNewDeviceAvailable:
             case AVAudioSessionRouteChangeReasonOldDeviceUnavailable:
@@ -260,12 +274,23 @@ RCT_EXPORT_METHOD(updateDeviceList) {
                 NSLog(@"Category has changed");
                 // The category has changed. Check if it's the one we want and adjust as
                 // needed.
+                NSLog(session.category);
                 break;
             default:
                 return;
         }
 
         NSLog(@"in audioSession Did Change Route");
+        if (self->activeMode == kAudioModeDefault) {
+            NSLog(@"Current mode is kAudioModeDefault");
+        }
+        if (self->activeMode == kAudioModeAudioCall) {
+            NSLog(@"Current mode is kAudioModeAudioCall");
+        }
+        if (self->activeMode == kAudioModeVideoCall) {
+            NSLog(@"Current mode is kAudioModeVideoCall");
+        }
+
 
         // We don't want to touch the category when in default mode.
         // This is to play well with other components which could be integrated
